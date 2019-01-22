@@ -160,7 +160,7 @@ class BookShelves extends Component {
         </div>
         </div>
         <div className="open-search">
-          <button onClick={() => this.setState({ showSearchPage: true })}>Add a book</button>
+          <Link to="/search" className="search-button">Add a book</Link>
         </div>
       </div>
     )
