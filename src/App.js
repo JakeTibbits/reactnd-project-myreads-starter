@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
-import Book from './BooksDisplay'
+import Shelf from './BooksDisplay'
 import BookSearch from './BookSearch'
 import { Link } from 'react-router-dom'
 import './App.css'
@@ -13,31 +13,38 @@ class BooksApp extends Component {
             {key: 'wantToRead', title: "Want to Read", books: []},
             {key: 'read', title: "Read", books: []},
             {key: 'none', title:"None", books: []}
-          ]
+          ],
+    books: []
   }
 
   componentDidMount() {
-    this.shelvesRefresh()
+    this.getBooks()
   }
 
-  shelvesRefresh = () => {
+  getBooks = () => {
     BooksAPI.getAll().then((books) => {
-      let newState = Object.assign({}, this.state)
-
-      for(let shelf of newState.shelves){
-        const shelfBooks = books.filter((book) => {
-          return book.shelf === shelf.key
-        })
-        shelf.books = shelfBooks
-      }
-      this.setState({ newState })
+      this.setState({ books })
+      this.shelvesRefresh(this.state.books)
     })
   }
 
+  shelvesRefresh = (books) => {
 
-  moveBook(book, shelf) {
+    let newState = Object.assign({}, this.state)
+
+    for(let shelf of newState.shelves){
+      const shelfBooks = books.filter((book) => {
+        return book.shelf === shelf.key
+      })
+      shelf.books = shelfBooks
+    }
+    this.setState({ newState })
+  }
+
+
+  moveBook = (book, shelf) => {
     BooksAPI.update(book, shelf).then(()=>{
-      this.shelvesRefresh()
+      this.getBooks()
     })
   }
 
@@ -50,7 +57,7 @@ class BooksApp extends Component {
       <div className="app">
 
         <Route path="/search" render={({ history }) => (
-          <BookSearch/>
+          <BookSearch shelves={this.state.shelves} onMoveBook={this.moveBook} currentBooks={this.state.books}/>
         )}/>
 
 
@@ -62,18 +69,7 @@ class BooksApp extends Component {
               <div className="list-books-content">
                 {this.state.shelves.map((shelf) => (
                   shelf.key !== 'none' && (
-                    <div className="bookshelf" key={shelf.key}>
-                      <h2 className="bookshelf-title">{shelf.title}</h2>
-                      <div className="bookshelf-books">
-                        <ol className="books-grid">
-                          { shelf.books.map((book) => (
-                            <Book key={book.industryIdentifiers[0].identifier} book={book} shelves={this.state.shelves} onMoveBook={(shelf)=>(
-                                this.moveBook(book, shelf)
-                              )}/>
-                          ))}
-                        </ol>
-                      </div>
-                    </div>
+                    <Shelf key={shelf.key} shelf={shelf} shelves={this.state.shelves} onMoveBook={this.moveBook}/>
                   )
                 ))}
               </div>

@@ -6,25 +6,25 @@ import VisibilitySensor from 'react-visibility-sensor'
 class Book extends Component{
 
   moveBook = (e) => {
-    console.log('change event fired')
     const newShelf = e.target.value
     this.props.onMoveBook(newShelf)
   }
 
   render() {
 
+
     const { book, shelves } = this.props,
           imgLoading = <div className="book-cover loading">...</div>,
           imgNotFound = <div className="book-cover not-found">Cover art missing</div>,
           buildAuthorList = (authors) => {
-            if(authors.length >1){
+            if(typeof authors === 'object' && authors.length >1){
               let authorList = []
               for(let [i, author] of authors.entries()){
                 authorList.push(<span className="author" key={author}>{ author + (i < authors.length-1 ? ', ' : '')}</span>)
               }
               return authorList
             } else {
-              return authors[0]
+              return authors
             }
           }
 
@@ -33,7 +33,7 @@ class Book extends Component{
         <VisibilitySensor>
         <div className="book">
           <div className="book-top">
-            <Img className="book-cover" src={book.imageLinks.thumbnail} loader={imgLoading} unloader={imgNotFound}/>
+            <Img className="book-cover" src={typeof book.imageLinks === 'object' &&(book.imageLinks.thumbnail)} loader={imgLoading} unloader={imgNotFound}/>
             <div className="book-shelf-changer">
               <select defaultValue={book.shelf} onChange={this.moveBook} >
                 <option value="move" disabled>Move to...</option>
@@ -53,4 +53,27 @@ class Book extends Component{
 }
 
 
-export default Book
+class Shelf extends Component{
+
+  render() {
+
+    const shelf = this.props.shelf
+
+    return (
+      <div className="bookshelf" key={shelf.key}>
+        <h2 className="bookshelf-title">{shelf.title}</h2>
+        <div className="bookshelf-books">
+          <ol className="books-grid">
+            { shelf.books.length > 0 &&(shelf.books.map((book) => (
+              <Book key={book.industryIdentifiers[0].identifier} book={book} shelves={this.props.shelves} onMoveBook={(shelf)=>(
+                  this.props.onMoveBook(book, shelf)
+                )}/>
+            )))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
+}
+
+export default Shelf
