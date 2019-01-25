@@ -35,7 +35,7 @@ class Book extends Component{
           <div className="book-top">
             <Img className="book-cover" src={typeof book.imageLinks === 'object' &&(book.imageLinks.thumbnail)} loader={imgLoading} unloader={imgNotFound}/>
             <div className="book-shelf-changer">
-              <select defaultValue={book.shelf} onChange={this.moveBook} >
+              <select defaultValue={ (book.shelf ? book.shelf : 'none')} onChange={this.moveBook} >
                 <option value="move" disabled>Move to...</option>
                 {shelves.map((shelf) => (
                   <option value={shelf.key} key={shelf.key}>{shelf.title}</option>
